@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ContactService {
-    public void saveContact(Contact contact) {
+    public boolean saveContact(Contact contact) {
+
+        return true;
     }
 }
