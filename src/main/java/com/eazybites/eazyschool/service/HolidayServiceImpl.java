@@ -4,6 +4,8 @@ import com.eazybites.eazyschool.model.Holiday;
 import com.eazybites.eazyschool.repository.JpaHolidayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -12,7 +14,7 @@ public class HolidayServiceImpl {
     JpaHolidayRepository holidayRepository;
 
     public List<Holiday> displayHolidays() {
-        return holidayRepository.findAll();
+        return new ArrayList<>(holidayRepository.findAll());
     }
 
 }
