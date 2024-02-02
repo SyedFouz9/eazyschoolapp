@@ -4,41 +4,50 @@ import com.eazybites.eazyschool.constants.EazySchoolConstants;
 import com.eazybites.eazyschool.model.Contact;
 import com.eazybites.eazyschool.repository.JpaContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ContactService {
     //private ContactRepository contactRepository;
+    @Autowired
     private JpaContactRepository contactRepository;
 
-    @Autowired
-    public ContactService(JpaContactRepository contactRepository) {
-        this.contactRepository = contactRepository;
-    }
-
-    public boolean saveContact(Contact contact) {
+    /**
+     * Save Contact Details into DB
+     * @param contact
+     * @return boolean
+     */
+    public boolean saveMessageDetails(Contact contact){
+        boolean isSaved = false;
         contact.setStatus(EazySchoolConstants.OPEN);
         Contact savedContact = contactRepository.save(contact);
-        if (savedContact.getContactId() > 0) {
-            return true;
+        if(null != savedContact && savedContact.getContactId()>0) {
+            isSaved = true;
         }
-        return false;
+        return isSaved;
     }
 
-    public List<Contact> findMsgsWithOpenStatus() {
-        List<Contact> contactMsgs = contactRepository.findByStatus(EazySchoolConstants.OPEN);
-        return contactMsgs;
+    public Page<Contact> findMsgsWithOpenStatus(int pageNum,String sortField, String sortDir){
+        int pageSize = 5;
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize,
+                sortDir.equals("asc") ? Sort.by(sortField).ascending()
+                        : Sort.by(sortField).descending());
+        Page<Contact> msgPage = contactRepository.findByStatus(
+                EazySchoolConstants.OPEN,pageable);
+        return msgPage;
     }
-    public boolean updateMsgStatus(int contactId) {
+
+    public boolean updateMsgStatus(int contactId){
         boolean isUpdated = false;
-        Optional<Contact> contact = contactRepository.findById(contactId);
-        contact.ifPresent(contact1 -> contact1.setStatus(EazySchoolConstants.CLOSE));
-        Contact updatedContact = contactRepository.save(contact.get());
-        if (updatedContact.getUpdatedBy() != null) {
+        int rows = contactRepository.updateMsgStatusNative(EazySchoolConstants.CLOSE,contactId);
+        if(rows > 0) {
             isUpdated = true;
         }
         return isUpdated;
